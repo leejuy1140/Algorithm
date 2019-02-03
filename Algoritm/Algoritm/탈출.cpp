@@ -87,6 +87,8 @@ int main()
 		for (int j = 0; j < m; j++)
 		{
 			scanf("%1c", &map[i][j]);
+
+			// 물이 범람하는 시간과 겹치는 것을 방지하기 위해 큰 수로 바꿈
 			if (map[i][j] == 'X') map[i][j] = STONE;
 			if (map[i][j] == '*') map[i][j] = WATER;
 			if (map[i][j] == '.') map[i][j] = BLANK;

@@ -18,8 +18,5 @@
     <ClCompile Include="보물섬.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="소수 경로.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
