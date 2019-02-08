@@ -13,7 +13,9 @@ struct INFO
 {
 	int r, c, time;
 	void setInfo(int _r, int _c, int _t)
-	{ r = _r; c = _c; time = _t; }
+	{
+		r = _r; c = _c; time = _t;
+	}
 };
 
 int bfs(int c, int r)
@@ -31,7 +33,11 @@ int bfs(int c, int r)
 		INFO cur = q.front();
 		q.pop();
 
-		if (cur.time == k) damCnt++;
+		if (cur.time == k)
+		{
+			damCnt++;
+			continue;
+		}
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -44,8 +50,8 @@ int bfs(int c, int r)
 			visited[next.r][next.c] = 1;
 		}
 	}
-	if (!damCnt) return -1;
-	else	    	 return damCnt;
+	if (!damCnt || !k) return -1;
+	else	          	 return damCnt;
 }
 
 int main()

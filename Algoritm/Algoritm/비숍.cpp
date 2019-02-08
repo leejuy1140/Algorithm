@@ -1,93 +1,122 @@
 #include <stdio.h>
 #include <string.h>
-#include <queue>
+#include <utility>
 using namespace std;
 
 const int SIZE = 11;
 
-int n, board[SIZE][SIZE], route[SIZE][SIZE];
-int dir[4][2] = { {-1, -1}, {-1, 1}, {1, -1}, {1, 1} };
+bool visitedCol[SIZE];
+int n, answer, chess[SIZE][SIZE];
 
-/* 비숍 경로 체크 (set: 1 -> set, 0 -> clear) */
-void chkRoute(int r, int c, int bishopCnt, int set)
+/* 검정판과 흰색판을 만드는 함수 (color: 1 -> 검정색, 0 -> 흰색) */
+void makeColorBoard(int board[][SIZE], pair<int, int> &size, int color)
 {
-	if (set) route[r][c] = bishopCnt;
-	else	 route[r][c] = 0;
+	/* 중간에 같은 크기의 열이 있으면, flag 올려두기. */
+	int color_c, flag = 0;
 
-	for (int i = 0; i < 4; i++)
+	/* 판의 전체 행과 열의 크기 구하기. */
+	if (color)
 	{
-		int next_r = r + dir[i][0];
-		int next_c = c + dir[i][1];
-
-		while (next_r >= 0 && next_c >= 0 && next_r < n && next_c < n)
-		{
-			// 비숍을 놓을 수 있는 곳이면, 경로 체크.
-			if (board[next_r][next_c])
-			{
-				// set인데, 다른 비숍의 경로와 겹치지 않으면,
-				if (set && !route[next_r][next_c])
-					route[next_r][next_c] = bishopCnt; // set
-
-				// clear인데, 내가 체크했던 경로면,
-				if (!set && route[next_r][next_c] == bishopCnt)
-					route[next_r][next_c] = 0; // clear
-			}
-			next_r += dir[i][0];
-			next_c += dir[i][1];
-		}
+		size.first = size.second = n;
+		if (!(n % 2)) // n이 짝수면, 검정판 열 1 감소 및 같은 크기의 열 존재.
+		{ size.second = n - 1; flag = 1; }
+		color_c = size.second / 2;
 	}
+	else
+	{
+		size.first = size.second = n - 1;
+		if (!(n % 2)) size.second = n; // n이 짝수면, 흰판 열 1 증가.
+		else		  flag = 1;		   // 홀수면, 중간에 같은 크기의 열 존재.
+		color_c = n / 2 - 1;
+	}
+
+	for (int color_r = 0; color_r < size.first; color_r++)
+	{
+		/* 검정판은 체스판의 짝수 행, 0 열 부터 시작.
+		   흰판은 체스판의 홀수 행, 0 열 부터 시작.   */
+		int chess_r = 2 * color_r, chess_c = 0;
+		if (!color) chess_r++;
+
+		// 체스판의 행이 n을 넘어가면, 그 차이만큼 열로 이동.
+		if (chess_r >= n)
+		{
+			chess_c = chess_r - (n - 1);
+			chess_r = n - 1;
+		}
+
+		int c = color_c;
+		if (c < 0) c *= -1;
+
+		while (chess_r >= 0 && chess_c >= 0 && chess_r <= n - 1 && chess_c <= n - 1)
+		{
+			board[color_r][c] = chess[chess_r][chess_c];
+			c++; chess_r--; chess_c++;
+		}
+
+		if (flag && !color_c) flag = 0;
+		else				  color_c--;
+	}
+
 }
 
-int answer = 0;
-void setBishop(int r, int c, int bishopCnt)
+int setBishop(int board[][SIZE], pair<int, int> &size, int r, int c, int cnt)
 {
-	if (r >= n) return;
+	visitedCol[c] = 1;
 
-	for (int set = 1; set >= 0; set--)
+	for (int i = r + 1; i < size.first; i++)
 	{
-		// 비숍 놓고, 경로 표시
-		chkRoute(r, c, bishopCnt, set);
-		if (!set) bishopCnt--;
-
-		// 다음 위치 찾기
-		int next_r = r, next_c = c;
-		while (1)
+		for (int j = 0; j < size.second; j++)
 		{
-			next_c++;
-			if (next_c >= n)
+			if (board[i][j] == 1 && !visitedCol[j])
 			{
-				next_r++;
-				next_c = 0;
+				setBishop(board, size, i, j, cnt + 1);
+				visitedCol[j] = 0;
 			}
-			if (next_r >= n)
-			{
-				answer = answer > bishopCnt ? answer : bishopCnt;
-				break;
-			}
-			if (board[next_r][next_c] && !route[next_r][next_c]) break;
 		}
-		setBishop(next_r, next_c, bishopCnt + 1);
 	}
+	return answer = answer > cnt ? answer : cnt;
 }
 
 int main()
 {
-	scanf("%d", &n);
+	int ret1 = 0, ret2 = 0;
+	pair<int, int> black_size, white_size;	  // 행, 열 크기
+	int black[SIZE][SIZE], white[SIZE][SIZE]; // 검정판, 흰판
 
-	int s_r = -1, s_c = -1;
+	scanf("%d", &n);
 	for (int i = 0; i < n; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			scanf("%d", &board[i][j]); // 1: 비숍 O
-			if (board[i][j] && s_r < 0 && s_c < 0)
-			{ s_r = i; s_c = j; } // 비숍 첫 자리
+			scanf("%d", &chess[i][j]);
+			black[i][j] = -1;
+			white[i][j] = -1;
+		}
+	}
+	makeColorBoard(black, black_size, 1);
+	makeColorBoard(white, white_size, 0);
+
+	for (int i = 0; i < black_size.first; i++)
+	{
+		for (int j = 0; j < black_size.second; j++)
+		{
+			if (black[i][j] == 1 && !visitedCol[j])
+				ret1 = setBishop(black, black_size, i, j, 1);
 		}
 	}
 
-	if (s_r >= 0 && s_c >= 0)
-		setBishop(s_r, s_c, 1);
-	printf("%d\n", answer);
+	answer = 0;
+	memset(visitedCol, 0, n);
+	for (int i = 0; i < white_size.first; i++)
+	{
+		for (int j = 0; j < white_size.second; j++)
+		{
+			if (white[i][j] == 1 && !visitedCol[j])
+				ret2 = setBishop(white, white_size, i, j, 1);
+		}
+	}
+	printf("%d\n", ret1 + ret2);
 
 	return 0;
+
 }
