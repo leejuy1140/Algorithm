@@ -2,7 +2,7 @@
 #include <algorithm>
 using namespace std;
 
-const int MAX = 1000;
+const int MAX = 100005;
 
 /* sort의 3번째 인자로 넣어주면, 아래 기준에 따라 정렬. */
 bool compare(pair<int, int> &a, pair<int, int> &b)
@@ -35,10 +35,10 @@ int main()
 		int dy = abs(point[i + 1].second - point[i].second);
 		if (dx == 0) dx = 1; // div by 0 조심..
 
-		double slope = dy / dx;
+		double slope = (double)dy / dx;
 		maxSlope = max(maxSlope, slope);
 	}
-	printf("%lf\n", maxSlope);
+	printf("%.3lf\n", maxSlope);
 
 	return 0;
 }

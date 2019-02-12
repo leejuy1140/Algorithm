@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="두 점 기울기의 최대값.cpp">
+    <ClCompile Include="회의실 준비.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="미팅 참석.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
