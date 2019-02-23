@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="에어컨.cpp">
+    <ClCompile Include="13460_구슬 탈출 2.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

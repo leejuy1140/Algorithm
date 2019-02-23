@@ -87,7 +87,5 @@ int main()
 		printf("#%d %d %d %d\n", k, score, x + 1, y + 1);
 	}
 
-
-
 	return 0;
 }
