@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstring>
-#include <cmath>
 #include <queue>
 using namespace std;
 
@@ -12,7 +11,22 @@ int dir[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 /* 연합을 이루는지 체크. */
 bool isTeam(int a, int b)
 {
-	if (abs(a - b) >= l && abs(a - b) <= r) return true;
+	if (abs(a - b) < l || abs(a - b) > r) return false;
+	return true;
+}
+
+/* 이웃 나라 중 하나라도 연합인 국가가 있으면, 참 반환. */
+bool chkNeighbor(int r, int c)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int nr = r + dir[i][0];
+		int nc = c + dir[i][1];
+		if (nr < 0 || nc < 0 || nr >= n || nc >= n) continue;
+		if (team[nr][nc]) continue;
+
+		if (isTeam(map[nr][nc], map[r][c])) return true;
+	}
 	return false;
 }
 
@@ -25,7 +39,7 @@ int bfs(int r, int c, int teamNum)
 
 	int totalCnt = 1;		  // 현재 연합 수.
 	int totalPop = map[r][c]; // 현재 연합의 총 인구 수.
-	
+
 	while (!q.empty())
 	{
 		pair<int, int> cur = q.front();
@@ -40,15 +54,15 @@ int bfs(int r, int c, int teamNum)
 
 			if (isTeam(map[nr][nc], map[cur.first][cur.second]))
 			{
-				q.push(make_pair(nr, nc));
 				totalCnt++;
 				totalPop += map[nr][nc];
+				team[nr][nc] = teamNum;
+				q.push(make_pair(nr, nc));
 			}
 		}
 	}
 
-	if (totalCnt == 1)
-	{
+	if (totalCnt == 1) {
 		team[r][c] = 0;
 		return 0;
 	}
@@ -72,11 +86,10 @@ int main()
 		{
 			for (int j = 0; j < n; j++)
 			{
-				if (!team[i][j])
+				if (chkNeighbor(i, j) && !team[i][j])
 				{
 					int curTeamPop = bfs(i, j, teamNum);
-					if (curTeamPop)
-					{
+					if (curTeamPop) {
 						teamPop.push_back(curTeamPop);
 						teamNum++;
 					}
