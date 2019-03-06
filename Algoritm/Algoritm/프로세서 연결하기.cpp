@@ -1,111 +1,88 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
-
-const int CORE = 1;
-const int WIRE = 2;
+#include <vector>
+using namespace std;
 
 const int MAX = 12;
 const int INF = 99999999;
+const int WIRE = 2;
 
-int core[MAX][3]; // 0: ¼±ÅÃ ¿©ºÎ, 1: r, 2: c
-int n, coreCnt, curLen, minLen, board[MAX][MAX];
+int n, minWireLen, board[MAX][MAX];
 int direction[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
-// °¡Àå ÀÚ¸®¿¡ À§Ä¡ÇÏ¸é, true ¹İÈ¯.
-bool checkEdge(int r, int c)
-{
-	return (!r || !c || r >= n - 1 || c >= n - 1);
-}
+vector<int> selectedIdx; // ì—°ê²°í•  ì½”ì–´ ì„ íƒ.
+vector<pair<int, int>> core; // ê°€ì¥ ìë¦¬ ì•„ë‹Œ ì½”ì–´ì˜ ìœ„ì¹˜ ì €ì¥.
 
-int SetWire(int r, int c, int dir)
-{
-	int rr = r;
-	int cc = c;
-	int len = 0;
-	bool flag = 0; // Àü¼±À» ¼³Ä¡ÇÏÁö ¸øÇÏ¸é, 1.
 
+/* ì„ íƒëœ ì½”ì–´ë¥¼ ëª¨ë‘ ì „ì›ì— ì—°ê²°í•˜ë©´, ìµœì†Œ ì „ì„  ê¸¸ì´ ê°±ì‹ . */
+void ConnectWire(int _idx, int _dir, int _curWireLen)
+{
+	if (_idx == selectedIdx.size())
+	{
+		if (minWireLen > _curWireLen) minWireLen = _curWireLen;
+		return;
+	}
+
+	// 1. ì „ì„  ì—°ê²°.
+	int add = 0; // ì¶”ê°€í•  ì „ì„  ê¸¸ì´.
+	bool flag = 0; // ì—°ê²° ì‹¤íŒ¨ ì‹œ, 1.
+
+	int coreIdx = selectedIdx[_idx];
+	int r = core[coreIdx].first;
+	int c = core[coreIdx].second;
 	while (1)
 	{
-		rr += direction[dir][0];
-		cc += direction[dir][1];
-		if (rr < 0 || cc < 0 || rr >= n || cc >= n) break;
-		if (board[rr][cc]) { flag = 1; break; }
+		r += direction[_dir][0];
+		c += direction[_dir][1];
+		if (r < 0 || c < 0 || r >= n || c >= n) break;
+		if (board[r][c]) { flag = 1; break; }
 
-		len++;
-		board[rr][cc] = WIRE;
+		add++;
+		board[r][c] = WIRE;
 	}
-	if (flag)
+	if (flag) return; // ì—°ê²° ì‹¤íŒ¨ ì‹œ, ì¢…ë£Œ.
+
+	// 2. ì „ì„  ì„±ê³µì  ì„¤ì¹˜ í›„, í˜„ì¬ ë³´ë“œ ìƒíƒœ ì €ì¥.
+	int copyBoard[MAX][MAX];
+	for (int i = 0; i < n; i++)
+		memcpy(&copyBoard[i], &board[i], sizeof(int) * n);
+
+	// 3. ë‹¤ìŒ ì½”ì–´ ì—°ê²°.
+	for (int i = 0; i < 4; i++)
 	{
-		rr = r;
-		cc = c;
-		while (1)
-		{
-			rr += direction[dir][0];
-			cc += direction[dir][1];
-			if (rr < 0 || cc < 0 || rr >= n || cc >= n) break;
-			if (board[rr][cc]) break;
-
-			board[rr][cc] = 0;
-		}
-		len = 0;
+		ConnectWire(_idx + 1, i, _curWireLen + add);
+		for (int k = 0; k < n; k++)
+			memcpy(&board[k], &copyBoard[k], sizeof(int) * n);
 	}
-
-	return len;
 }
 
-int GetWireLength(int idx, int dir)
+/* ì—°ê²°í•  ì½”ì–´ë¥¼ _remainì´ 0ì´ ë  ë•Œê¹Œì§€ ì„ íƒ. */
+void SelectCore(int _idx, int _remain)
 {
-	// 1. ÇöÀç core¿¡¼­ dir ¹æÇâÀ¸·Î Àü¼± ¼³Ä¡.
-	// Àü¼±À» ¼³Ä¡ÇÏÁö ¸øÇÑ´Ù¸é, Á¾·á.
-	int ret = SetWire(core[idx][1], core[idx][2], dir);
-	if (!ret) return;
+	if (_idx + _remain >= core.size()) return;
 
-
-	// ´ÙÀ½¿¡ ¿¬°áÇÒ core Ã£±â.
-	for (int i = idx + 1; i < coreCnt; i++)
+	// ì½”ì–´ ì„ íƒ ì™„ë£Œí–ˆìœ¼ë©´, ì „ì„  ì—°ê²°.
+	if (_remain == 0)
 	{
-		if (!core[i][0]) continue;
-		if (checkEdge) continue;
+		int copyBoard[MAX][MAX]; // í˜„ì¬ ë³´ë“œ ìƒíƒœ ì €ì¥.
+		for (int i = 0; i < n; i++)
+			memcpy(&copyBoard[i], &board[i], sizeof(int) * n);
 
-		for (int j = 0; j < 4; j++)
+		for (int i = 0; i < 4; i++) // ì²« ë²ˆì§¸ ì½”ì–´ë¶€í„° ì—°ê²°.
 		{
-			GetWireLength(i, j);
-			
-		}
-		break;
-	}
-
-	curLen -= addLen;
-}
-
-void SelectCore(int idx, int remain)
-{
-	core[idx][0] = 1;
-
-	if (remain == 1)
-	{
-		for (int i = 0; i < coreCnt; i++)
-		{
-			if (!core[i][0]) continue;
-			if (checkEdge) continue;
-
-			for (int j = 0; j < 4; j++)
-			{
-				int save[MAX][MAX]
-				GetWireLength(i, j);
-				minLen = minLen < curLen ? minLen : curLen;
-			}
-			break;
+			ConnectWire(0, i, 0);
+			for (int k = 0; k < n; k++)
+				memcpy(&board[k], &copyBoard[k], sizeof(int) * n);
 		}
 		return;
 	}
 
-	for (int i = idx; i < coreCnt; i++)
+	// ë‹¤ìŒì— ì—°ê²°í•  ì½”ì–´ ì°¾ê¸°.
+	for (int i = _idx + 1; i < core.size(); i++)
 	{
-		if (coreCnt - i < remain) break;
-		
-		SelectCore(i, remain - 1);
-		core[i][0] = 0;
+		selectedIdx.push_back(i);
+		SelectCore(i, _remain - 1);
+		selectedIdx.pop_back();
 	}
 }
 
@@ -115,43 +92,35 @@ int main()
 	scanf("%d", &t);
 	for (int T = 1; T <= t; T++)
 	{
-		scanf("%d", &n); // ÀÔ·Â.
+		minWireLen = INF;
+		core.clear();
+		selectedIdx.clear();
+
+		scanf("%d", &n);
 		for (int i = 0; i < n; i++)
 		{
 			for (int j = 0; j < n; j++)
 			{
 				scanf("%d", &board[i][j]);
-				if (board[i][j] == CORE)
-				{
-					core[coreCnt][0] = 0;
-					core[coreCnt][1] = i;
-					core[coreCnt][2] = j;
-					coreCnt++;
-				}
+				if (i && j && i < n && j < n)
+					if (board[i][j]) core.push_back(make_pair(i, j));
 			}
 		}
 		
-		// ¸ğµç core ~ 1°³.
-		for (int i = coreCnt; i >= 1; i--)
+		/* ì½”ì–´ë¥¼ ë§ì´ ì—°ê²°í•˜ëŠ” ìˆœìœ¼ë¡œ, ì²´í¬. */
+		for (int cnt = core.size(); cnt >= 1; cnt--)
 		{
-			for (int j = 0; j < coreCnt; j++)
+			for (int idx = 0; idx < core.size(); idx++)
 			{
-				if (coreCnt - j < coreCnt) break;
-				
-				SelectCore(j, i);
-				core[j][0] = 0;
+				selectedIdx.push_back(idx);
+				SelectCore(idx, cnt - 1);
+				selectedIdx.pop_back();
 			}
-			if (minLen != INF) break;
-		}
-		printf("#%d %d\n", T, minLen);
 
-		minLen = INF; // ÃÊ±âÈ­.
-		coreCnt = 0;
-		for (int i = 0; i < n; i++)
-		{
-			memset(&board[i], 0, sizeof(int) * n);
-			memset(&core[i], 0, sizeof(int) * 3);
+			// ì½”ì–´ëŠ” ìµœëŒ€ ì„ íƒì´ë¯€ë¡œ, ì—°ê²° ê°€ëŠ¥í•˜ë©´, íƒˆì¶œ.
+			if (minWireLen != INF) break;
 		}
+		printf("#%d %d\n", T, minWireLen);
 	}
 
 	return 0;
