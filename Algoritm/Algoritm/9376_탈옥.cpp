@@ -3,73 +3,44 @@
 #include <queue>
 using namespace std;
 
-const int MAX = 101;
-const int TOGETHER = 2;
+const int MAX = 105;
+const int INF = 99999999;
 
 int n, m;
 char map[MAX][MAX];
-int visited[MAX][MAX];
-vector<pair<int, int>> prisoner;
+int open[MAX][MAX];
+bool visited[MAX][MAX];
 int dir[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
-int bfs()
+typedef pair<int, pair<int, int>> myPair;
+
+void bfs(int r, int c)
 {
-	queue <pair<int, pair<int, int>>> q; // ÁË¼ö ¹øÈ£, ÁÂÇ¥
-	q.push(make_pair(0, prisoner[0]));
-	q.push(make_pair(1, prisoner[1]));
-	visited[prisoner[0].first][prisoner[0].second] = 1;
-	visited[prisoner[1].first][prisoner[1].second] = 1;
+	memset(visited, 0, sizeof(visited));
+	
+	priority_queue<myPair, vector<myPair>, greater<myPair>> pq;
+	pq.push(make_pair(0, make_pair(r, c)));
+	visited[r][c] = 1;
 
-	int doorCnt = 0;
-	int breakCnt = 0; // 3ÀÌ µÇ¸é, ´Ù Å»¿Á.
-	while (!q.empty())
+	while (!pq.empty())
 	{
-		int cur_p = q.front().first;
-		int cur_r = q.front().second.first;
-		int cur_c = q.front().second.second;
-		q.pop();
-
-		if (!cur_r || !cur_c || cur_r == n - 1 || cur_c == m - 1)
-		{
-			if (cur_p == TOGETHER) return visited[cur_r][cur_c];
-
-			breakCnt += 
-			if(breakCnt >=  3) 
-
-			continue;
-		}
+		myPair cur = pq.top();
+		pq.pop();
 
 		for (int i = 0; i < 4; i++)
 		{
-			int next_r = cur_r + dir[i][0];
-			int next_c = cur_c + dir[i][1];
-			if (next_r < 0 || next_c < 0 || next_r >= n || next_c >= m) continue;
-			if (map[next_r][next_c] == '*') continue;
+			int nr = cur.second.first + dir[i][0];
+			int nc = cur.second.second + dir[i][1];
+			if (nr < 0 || nc < 0 || nr > n + 1 || nc > m + 1) continue;
+			if (map[nr][nc] == '*' || visited[nr][nc]) continue;
+			
+			int ncnt = cur.first;
+			if (map[nr][nc] == '#') ncnt++;
 
-			if (map[next_r][next_c] == '#')
-			{
-				if(visited[next_r][next_c])
-				q.push(make_pair(cur_p, make_pair(next_r, next_c)));
-				visited[next_r][next_c] = visited[cur_r][cur_c] + 1;
-			}
-			else
-				visited[next_r][next_c][cur_p] = visited[cur_r][cur_c][cur_p];
+			pq.push(make_pair(ncnt, make_pair(nr, nc)));
+			visited[nr][nc] = 1;
+			open[nr][nc] += ncnt;
 		}
-	}
-
-	printf("[0]\n");
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < m; j++)
-			printf("%d", visited[i][j][0]);
-		printf("\n");
-	}
-	printf("[1]\n");
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < m; j++)
-			printf("%d", visited[i][j][1]);
-		printf("\n");
 	}
 }
 
@@ -79,22 +50,40 @@ int main()
 	scanf("%d", &t);
 	while (t--)
 	{
+		vector<pair<int, int>> prisoner;
+
 		scanf("%d %d", &n, &m);
-		for (int i = 0; i < n; i++)
+		for (int i = 1; i <= n; i++)
 		{
 			getchar();
-			for (int j = 0; j < m; j++)
+			for (int j = 1; j <= m; j++)
 			{
 				scanf("%1c", &map[i][j]);
 				if (map[i][j] == '$')
 					prisoner.push_back(make_pair(i, j));
 			}
 		}
+		for (int i = 0; i < n + 2; i++) map[i][0] = map[i][m + 1] = '.';
+		for (int i = 0; i < m + 2; i++) map[0][i] = map[n + 1][i] = '.';
 
-		bfs();
+		bfs(0, 0);
+		for (int i = 0; i < 2; i++)
+			bfs(prisoner[i].first, prisoner[i].second);
 
-		prisoner.clear();
-		memset(visited, 0, sizeof(visited));
+		int minNum = INF;
+		for (int i = 0; i < n + 2; i++)
+		{
+			for (int j = 0; j < m + 2; j++)
+			{
+				if (map[i][j] == '*') continue;
+
+				if (map[i][j] == '#') open[i][j] -= 2;
+				if (minNum > open[i][j]) minNum = open[i][j];
+			}
+		}
+		printf("%d\n", minNum);
+
+		memset(open, 0, sizeof(open));
 	}
 	return 0;
 }
