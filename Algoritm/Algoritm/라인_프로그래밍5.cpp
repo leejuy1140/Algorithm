@@ -16,7 +16,7 @@ int solution() {
 	{
 		Info cur = q.front();
 		q.pop();
-		printf("%d %d %d\n", cur.c, cur.b, cur.time);
+		//printf("%d %d %d\n", cur.c, cur.b, cur.time);
 
 		if (cur.c == cur.b) return cur.time;
 
@@ -24,24 +24,33 @@ int solution() {
 		if (next_c >= MAX) return -1;
 
 		int next_b1 = cur.b + 1;
-		if ((!cur.time || visited[next_b1] != cur.time) && next_b1 < MAX && next_b1 >= 0)
+		if (next_b1 < MAX && next_b1 >= 0)
 		{
-			q.push({ next_c, next_b1, cur.c_move + 1, cur.time + 1 });
-			visited[next_b1] = cur.time;
+			if (!cur.time || visited[next_b1] != cur.time)
+			{
+				q.push({ next_c, next_b1, cur.c_move + 1, cur.time + 1 });
+				visited[next_b1] = cur.time;
+			}
 		}
 
 		int next_b2 = cur.b - 1;
-		if ((!cur.time || visited[next_b2] != cur.time) && next_b2 < MAX && next_b2 >= 0)
+		if (next_b2 < MAX && next_b2 >= 0)
 		{
-			q.push({ next_c, next_b2, cur.c_move + 1, cur.time + 1 });
-			visited[next_b2] = cur.time;
+			if (!cur.time || visited[next_b2] != cur.time)
+			{
+				q.push({ next_c, next_b2, cur.c_move + 1, cur.time + 1 });
+				visited[next_b2] = cur.time;
+			}
 		}
 
 		int next_b3 = cur.b * 2;
-		if ((!cur.time || visited[next_b3] != cur.time) && next_b3 < MAX && next_b3 >= 0)
+		if (next_b3 < MAX && next_b3 >= 0)
 		{
-			q.push({ next_c, next_b3, cur.c_move + 1, cur.time + 1 });
-			visited[next_b3] = cur.time;
+			if (!cur.time || visited[next_b3] != cur.time)
+			{
+				q.push({ next_c, next_b3, cur.c_move + 1, cur.time + 1 });
+				visited[next_b3] = cur.time;
+			}
 		}
 	}
 	return -1;
