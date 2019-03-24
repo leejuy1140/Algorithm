@@ -16,7 +16,7 @@ pair<int, int> GetSize(bool row_col)
 		bool flag = false;
 		for (int j = 0; j < MAX; j++)
 		{
-			int tmp;
+			char tmp;
 			if (row_col) tmp = map[i][j];
 			else		 tmp = map[j][i];
 
@@ -25,14 +25,10 @@ pair<int, int> GetSize(bool row_col)
 				start = start < j ? start : j;
 				flag = true;
 			}
-			if (flag && !tmp)
-			{
-				end = end > j ? end : j;
-				break;
-			}
+			if (flag && tmp) end = end > j ? end : j;
 		}
 	}
-	return make_pair(start, end);
+	return make_pair(start, end + 1);
 }
 
 int main()
@@ -49,21 +45,18 @@ int main()
 		char order;
 		scanf("%1c", &order);
 
-		if (order == 'R')
-		{
-			dir = (dir + 1) % 4;
-		}
-		else if (order == 'L')
+		if (order == 'L')
 		{
 			dir--;
 			if (dir < 0) dir = 3;
 		}
-		else
+		else if (order == 'F')
 		{
 			r += dr[dir];
 			c += dc[dir];
 			map[r][c] = 1;
 		}
+		else dir = (dir + 1) % 4;
 	}
 
 	pair<int, int> row = GetSize(0);
