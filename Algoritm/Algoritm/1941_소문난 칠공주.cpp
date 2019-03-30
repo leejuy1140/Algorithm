@@ -13,18 +13,16 @@ bool visited[SIZE][SIZE];
 int dr[4] = { -1, 1, 0, 0 };
 int dc[4] = { 0, 0, -1, 1 };
 
-int time = 0;
-
-/* 칠공주파와 인접한 친구라면, 참 반환. */
+/* 7명의 멤버들이 서로 인접했다면, 참 반환. */
 bool CanMember(int num, int member)
 {
-	memset(visited, false, sizeof(visited));
-
 	queue<int> q;
 	q.push(num);
-	visited[num / 5][num % 5] = true;
 
-	int cnt = 0;
+	int visited = 0;
+	visited |= (1 << num);
+
+	int cnt = 1;
 	while (!q.empty())
 	{
 		int cur = q.front();
@@ -32,58 +30,37 @@ bool CanMember(int num, int member)
 
 		for (int i = 0; i < 4; i++)
 		{
-			int nr = (num / SIZE) + dr[i];
-			int nc = (num % SIZE) + dc[i];
+			int nr = (cur / SIZE) + dr[i];
+			int nc = (cur % SIZE) + dc[i];
 			int nnum = (nr * SIZE) + nc;
 			if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
-			if (visited[nr][nc]) continue;
+			if (visited & (1 << nnum)) continue;
 
 			if (member & (1 << nnum))
 			{
 				cnt++;
 				q.push(nnum);
-				visited[nr][nc] = true;
+				visited |= (1 << nnum);
 			}
 		}
 	}
 	if (cnt == MAX) return true;
 	else			return false;
-
-	/*for (int i = 0; i < 4; i++)
-	{
-		int nr = (num / SIZE) + dr[i];
-		int nc = (num % SIZE) + dc[i];
-		int nnum = (nr * SIZE) + nc;
-		if (nr < 0 || nc < 0 || nr >= SIZE || nc >= SIZE) continue;
-		if (member & (1 << nnum)) return true;
-	}
-	return false;*/
 }
 
 /* 칠공주파 멤버를 만들 수 있는 모든 경우의 수 찾기. */
 void FindMember(int num, int cnt, int yCnt, int member)
 {
 	if (yCnt >= 4) return; // 탈출 1: 임도연파가 우위, 종료.
-	if (cnt == MAX)		   // 탈출 2: 칠공주 (인접하면 정답).
+	if (cnt == MAX)	       // 탈출 2: 칠공주 (인접하면 정답).
 	{
-		time++;
-		if (time == 3512)
-		{
-			for (int i = 0; i < SIZE * SIZE; i++)
-			{
-				if (member & (1 << i)) printf("1");
-				else printf("0");
-			}
-			printf("\n[%d]\n", num);
-		}
 		if (CanMember(num, member)) answer++;
-		return; // 인접하면, 정답.
+		return;
 	}
 
 	for (int i = num + 1; i < SIZE * SIZE; i++) // 나머지 멤버 찾기.
 	{
 		if (member & (1 << i)) continue;		// 방문 체크.
-		//if (!CanMember(i, member)) continue; // 인접 체크.
 
 		int add = 0;
 		if (map[i / SIZE][i % SIZE] == 'Y') add++;
@@ -100,7 +77,8 @@ int main()
 		getchar();
 	}
 
-	for(int i = 0; i < SIZE * SIZE; i++)
+	// 첫 번째 자리에 앉은 친구부터 칠공주파로 선택.
+	for (int i = 0; i < SIZE * SIZE; i++)
 	{
 		int add = 0;
 		if (map[i / SIZE][i % SIZE] == 'Y') add++;
