@@ -1,35 +1,25 @@
-#include <stdio.h>
-const int MAX = 9999999;
+#include <iostream>
+using namespace std;
 
-int answer = MAX;
-int bag[2] = { 5, 3 };
+const int MAX = 5001;
+const int INF = 9999999;
 
-void solution(int weight, int idx, int cnt)
-{
-	if (idx >= 2) return;
-	if (!weight) {
-		answer = answer < cnt ? answer : cnt;
-		return;
-	}
-
-	if (weight >= bag[idx]) // 넣을 수 있음.
-	{
-		solution(weight - bag[idx], idx, cnt + 1); // 넣음.
-		solution(weight, idx + 1, cnt); // 안넣음.
-	}
-	else solution(weight, idx + 1, cnt);
-}
+int n, dp[MAX];
 
 int main()
 {
-	int n;	
-	scanf("%d", &n);
-	solution(n, 0, 0);
-	if (answer == MAX)
+	cin >> n;
+
+	dp[3] = dp[5] = 1;
+	for (int i = 6; i <= n; i++)
 	{
-		if (n % bag[1] == 0) answer = n / bag[1];
-		else				 answer = -1;
+		int cnt1 = INF, cnt2 = INF;
+		if (dp[i - 3]) cnt1 = dp[i - 3] + 1;
+		if (dp[i - 5]) cnt2 = dp[i - 5] + 1;
+		dp[i] = cnt1 < cnt2 ? cnt1 : cnt2;
 	}
-	printf("%d", answer);
+	if (!dp[n] || dp[n] == INF) printf("-1");
+	else						printf("%d", dp[n]);
+	
 	return 0;
 }

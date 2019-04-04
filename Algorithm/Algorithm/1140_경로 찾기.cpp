@@ -10,16 +10,12 @@ int n, graph[MAX][MAX], answer[MAX][MAX];
 /* start에서 시작하여, 연결된 모든 노드는 answer 배열에 1로 표시. */
 void dfs(int start, int cur)
 {
-	visited[cur] = true; // 현재 노드 cur에 방문 체크.
 	for (int i = 0; i < n; i++) // 현재 노드 cur에 대하여,
 	{
-		// 1. 연결 안 된 노드면, 패스.
-		// 2. 시작점이 아닌데 방문 했었으면, 패스.
-		if (!graph[cur][i]) continue;
-		if (visited[i] && i != start) continue;
-
-		dfs(start, i); // i와 연결된 노드 찾으러 감.
+		if (!graph[cur][i] || visited[i]) continue;
 		answer[start][i] = 1; // 시작점에서 i는 경로가 있음.
+		visited[i] = true;    // 방문 체크.
+		dfs(start, i);		  // i와 연결된 노드 찾으러 감.
 	}
 }
 
