@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="2536_버스 갈아타기.cpp">
+    <ClCompile Include="9372_상근이의 여행.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
