@@ -58,7 +58,7 @@ void Moveshark()
 		if (shark[i].z == DEAD) continue;
 
 		/*// 2. 물고기 이동 1
-		// 시간: 물고기 속도와 비례.
+		// 시간: 물고기 속도와 비례. -> 최대 1000.
 		for (int k = 0; k < shark[i].s; k++)
 		{
 			int nr = shark[i].r + dir[shark[i].d][0];
@@ -77,30 +77,59 @@ void Moveshark()
 		}*/
 
 		// 2. 물고기 이동 2
-		// 시간: (물고기 속도 / 배열 크기)로 줄어듦.
-		int nr = shark[i].r + (dir[shark[i].d][0] * shark[i].s);
-		int nc = shark[i].c + (dir[shark[i].d][1] * shark[i].s);
-		while (nr < 1 || nr > R)
+		// 주기는 12345654321처럼 2(R-1)과 2(C-1)로 구할 수 있음.
+		// 따라서 물고기는 한 주기만 구하면, 나머지 위치도 동일.
+		// 시간: 2 * (배열 크기 - 1) -> 최대 20.
+		/*if (shark[i].d < 3)
 		{
-			if (nr > R) nr = (2 * R) - nr;
-			else if (nr < 1) nr = 2 - nr;
+			int cycle = 2 * (R - 1);
+			int move = shark[i].s % cycle;
+			while (move--)
+			{
+				if (shark[i].d == 1 && shark[i].r == 1) shark[i].d = 2;
+				if (shark[i].d == 2 && shark[i].r == R) shark[i].d = 1;
+				shark[i].r += dir[shark[i].d][0];
+			}
+		}
+		else
+		{
+			int cycle = 2 * (C - 1);
+			int move = shark[i].s % cycle;
+			while (move--)
+			{
+				if (shark[i].d == 3 && shark[i].c == C) shark[i].d = 4;
+				if (shark[i].d == 4 && shark[i].c == 1) shark[i].d = 3;
+				shark[i].c += dir[shark[i].d][1];
+			}
+		}*/
+
+		// 3. 물고기 이동 3
+		//  6  5  4  3 2 1 2 3 4 5 6 5 4 3  2  1
+		// -------------------------			  1set: 2 - (음수)
+		//               -----------------------  1set: 12 - (양수)
+		// -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11
+		// 시간: (물고기 속도 / 배열 크기)로 줄어듦. -> 최대 10.
+		shark[i].r += (dir[shark[i].d][0] * shark[i].s);
+		shark[i].c += (dir[shark[i].d][1] * shark[i].s);
+		while (shark[i].r < 1 || shark[i].r > R)
+		{
+			if (shark[i].r > R) shark[i].r = (2 * R) - shark[i].r;
+			else if (shark[i].r < 1) shark[i].r = 2 - shark[i].r;
 			shark[i].d = ReverseDir(shark[i].d);
 		}
-		while (nc < 1 || nc > C)
+		while (shark[i].c < 1 || shark[i].c > C)
 		{
-			if (nc > C) nc = (2 * C) - nc;
-			else if (nc < 1) nc = 2 - nc;
+			if (shark[i].c > C) shark[i].c = (2 * C) - shark[i].c;
+			else if (shark[i].c < 1) shark[i].c = 2 - shark[i].c;
 			shark[i].d = ReverseDir(shark[i].d);
 		}
 
 		// 3. 현재 위치에 이미 물고기가 있는데 나보다 작다면 잡아먹고, 크다면 잡아먹힘.
-		shark[i].r = nr;
-		shark[i].c = nc;
-		if (map[nr][nc])
+		if (map[shark[i].r][shark[i].c])
 		{
-			if (map[nr][nc] < shark[i].z)
+			if (map[shark[i].r][shark[i].c] < shark[i].z)
 			{
-				int prevSize = map[nr][nc];
+				int prevSize = map[shark[i].r][shark[i].c];
 				for (int k = 0; k < shark.size(); k++)
 				{
 					if (shark[k].z == prevSize)
@@ -109,11 +138,11 @@ void Moveshark()
 						break;
 					}
 				}
-				map[nr][nc] = shark[i].z;
+				map[shark[i].r][shark[i].c] = shark[i].z;
 			}
 			else shark[i].z = DEAD;
 		}
-		else map[nr][nc] = shark[i].z;
+		else map[shark[i].r][shark[i].c] = shark[i].z;
 	}
 }
 
