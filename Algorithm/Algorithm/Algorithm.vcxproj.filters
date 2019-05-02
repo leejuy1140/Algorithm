@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SWEA_2029.cpp">
+    <ClCompile Include="17140_이차원 배열과 연산.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
