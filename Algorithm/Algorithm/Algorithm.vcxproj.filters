@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="11559_Puyo Puyo.cpp">
+    <ClCompile Include="3085_사탕 게임.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
