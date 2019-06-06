@@ -8,7 +8,6 @@ int n, answer;
 char map[MAX][MAX];
 int dir[2][2] = { {1, 0}, {0, 1} }; // 아래, 오른쪽 칸과 교환.
 
-
 /* 현재 행의 가장 긴 사탕의 길이를 구하고 정답 갱신. */
 void longestCandyRow(int r)
 {
